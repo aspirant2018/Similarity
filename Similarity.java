@@ -44,6 +44,13 @@ public class Similarity {
 		return NameContent;
 	}
 	
+	private static HashMap<String, ArrayList<String>> tokenization(HashMap<String, String> nameContent) {
+		// TODO Auto-generated method stub
+		
+		return null;
+		
+	}
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
@@ -52,6 +59,12 @@ public class Similarity {
 		
 		listfile=listFiles("./src/US_Inaugural_Addresses/US_Inaugural_Addresses");
 		NameContent=readfiles(listfile);
+		
+		tokenization(NameContent);
+		
 	}
+
+
+	
 
 }
