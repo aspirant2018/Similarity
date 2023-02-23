@@ -30,12 +30,11 @@ public class Similarity {
 		HashMap <String,String> NameContent = new HashMap <>();
 		for (String namefile:listfile) {
 			String path= "./src/US_Inaugural_Addresses/US_Inaugural_Addresses/"+namefile;
-			System.out.println(path);
 			try {
 				String content = new String(Files.readAllBytes(Paths.get(path)));
 				NameContent.put(namefile, content);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			
@@ -44,15 +43,25 @@ public class Similarity {
 		return NameContent;
 	}
 	
-	private static HashMap<String, ArrayList<String>> tokenization(HashMap<String, String> nameContent) {
-		// TODO Auto-generated method stub
+	private static HashMap<String, ArrayList<String>>tokenization(HashMap<String, String> nameContent) {
 		
-		return null;
+		HashMap<String, ArrayList<String>> NameContentTokenized = new HashMap<>();
+		HashMap<String, String> NameContent =nameContent;
+		ArrayList<String> Tokens=new ArrayList<>();
+		
+		for (String namefile:NameContent.keySet()) {
+			for (String word:NameContent.get(namefile).split(" ")) {
+				Tokens.add(word);
+			}
+			
+			NameContentTokenized.put(namefile, Tokens);
+		}
+		return NameContentTokenized;
 		
 	}
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		
 		
 		ArrayList<String> listfile = new ArrayList<>();
 		HashMap <String,String> NameContent = new HashMap <>();
