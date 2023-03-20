@@ -1,3 +1,4 @@
+import java.util.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeMap;
@@ -75,9 +76,9 @@ public class Similarity {
 	
 // 2) Réprésentation en « sac de mots » des documents
 	
-	private static HashMap<String,TreeMap<String,Integer>> similarity(HashMap<String, ArrayList<String>> NameContentTokenized,int n) {
+	private static HashMap<String,HashMap<String,Integer>> similarity(HashMap<String, ArrayList<String>> NameContentTokenized,int n) {
 		
-		HashMap <String,TreeMap<String,Integer>> AllfilesSimilarity = new HashMap<>();
+		HashMap <String,HashMap<String,Integer>> AllfilesSimilarity = new HashMap<>();
 		
 		
 		for (String namefile_first: NameContentTokenized.keySet()) {
@@ -94,25 +95,48 @@ public class Similarity {
 					firstwords.removeAll(secondwords);
 					NombreCommun.putIfAbsent(namefile_second, n1-firstwords.size());
 				}
-			}			
-			
-			AllfilesSimilarity.put(namefile_first,sorting(NombreCommun,n));
-			//System.out.println(AllfilesSimilarity);
+			}
+			// sorting a HashMap
+			HashMap<String, Integer> SortedNombreCommun = Sorting(NombreCommun);
+			// les n documents les plus similaires
+			HashMap<String, Integer> LesPlusSimilaire = PlusSimilaire(SortedNombreCommun,n);
+			AllfilesSimilarity.put(namefile_first,Sorting(LesPlusSimilaire));
+			System.out.println(AllfilesSimilarity);
 			
 		}
 		return AllfilesSimilarity;
 	}
 	
-	private static HashMap<String,Integer> sorting(HashMap<String,Integer> NombreCommun,int n) {
-		
-		HashMap <String,Integer> SortedNombreCommun = new HashMap<>();
-		for (int i = 1 ; i < n ; i++) {
-			for ()
-		}
-		return SortedNombreCommun;
-		
-	}
 	
+	
+	private static HashMap<String,Integer> PlusSimilaire(HashMap<String, Integer> sortedNombreCommun, int n) {
+	// TODO Auto-generated method stub
+		HashMap<String, Integer> result = new HashMap<>();
+	    int count = 0;
+	    for (Map.Entry<String, Integer> entry : sortedNombreCommun.entrySet()) {
+	        if (count == n) {
+	            break;
+	        }
+	        result.put(entry.getKey(), entry.getValue());
+	        count++;
+	    }
+	    return result;
+}
+
+
+	// sorting function HashMap
+	
+	private static HashMap<String, Integer> Sorting(HashMap<String, Integer> map) {
+		
+	    List<Map.Entry<String, Integer>> list = new ArrayList<>(map.entrySet());
+	    list.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+	    HashMap<String, Integer> sortedMap = new LinkedHashMap<>();
+	    
+	    for (Map.Entry<String, Integer> entry : list) {
+	        sortedMap.put(entry.getKey(), entry.getValue());
+	    }
+	    return sortedMap;
+	}
 	
 	
 	public static void main(String[] args) {
@@ -127,9 +151,8 @@ public class Similarity {
 		HashMap<String, ArrayList<String>> NameContentTokenized = new HashMap<>();
 		NameContentTokenized= tokenization(NameContent);
 		
-		HashMap<String, TreeMap<String, Integer>> dic = similarity(NameContentTokenized);
+		HashMap<String, HashMap<String, Integer>> dic = similarity(NameContentTokenized, 5);
 		System.out.println(dic);
-		//System.out.println(NameContentTokenized.get("57_obama_2013.txt"));
 		
 		
 	}
