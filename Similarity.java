@@ -120,7 +120,7 @@ public class Similarity {
 	    }
 		
 	}
-	
+	// alot of function words 
 	
 	
 	private static HashMap<String,Integer> PlusSimilaire(HashMap<String, Integer> sortedNombreCommun, int n) {
@@ -154,6 +154,24 @@ public class Similarity {
 	
 	
 	
+	
+// 3)  Représentation tf.idf
+	
+	
+	public static HashMap<String,Integer> TermFrequency (ArrayList<String> MotsDeDoc ) {
+		HashMap<String, Integer> tf = new HashMap<>();
+
+	    // calculer le nombre d'occurence de chaque mot dans un seul document
+	    for (String Mot : MotsDeDoc) {
+	        if (tf.containsKey(Mot)) {
+	            tf.put(Mot, tf.get(Mot) + 1);
+	        } else {
+	            tf.put(Mot, 1);
+	        }
+	    }
+	    return tf;
+	}
+	
 	public static void main(String[] args) {
 		
 		
@@ -168,8 +186,11 @@ public class Similarity {
 		
 		HashMap<String, HashMap<String, Integer>> dic = similarity(NameContentTokenized, 5);
 		
-		MotsCommun(NameContentTokenized);
-		//System.out.println(dic);
+		//MotsCommun(NameContentTokenized);
+		
+		
+		//System.out.println(TermFrequency(NameContentTokenized.get("31_taft_1909.txt")));
+		
 		
 		
 	}
