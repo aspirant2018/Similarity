@@ -101,10 +101,24 @@ public class Similarity {
 			// les n documents les plus similaires
 			HashMap<String, Integer> LesPlusSimilaire = PlusSimilaire(SortedNombreCommun,n);
 			AllfilesSimilarity.put(namefile_first,Sorting(LesPlusSimilaire));
-			System.out.println(AllfilesSimilarity);
+			//System.out.println(AllfilesSimilarity);
 			
 		}
 		return AllfilesSimilarity;
+	}
+	
+	private static  void MotsCommun (HashMap<String, ArrayList<String>>NameContentTokenized) {
+		
+		HashSet<String> discourAncien= new HashSet<>(NameContentTokenized.get("01_washington_1789.txt"));
+		HashSet<String> discourRecent= new HashSet<>(NameContentTokenized.get("58_trump_2017.txt"));
+		 // Find common words
+	    discourAncien.retainAll(discourRecent);
+
+	    // Print common words
+	    for (String word : discourAncien) {
+	        System.out.println(word);
+	    }
+		
 	}
 	
 	
@@ -139,6 +153,7 @@ public class Similarity {
 	}
 	
 	
+	
 	public static void main(String[] args) {
 		
 		
@@ -152,7 +167,9 @@ public class Similarity {
 		NameContentTokenized= tokenization(NameContent);
 		
 		HashMap<String, HashMap<String, Integer>> dic = similarity(NameContentTokenized, 5);
-		System.out.println(dic);
+		
+		MotsCommun(NameContentTokenized);
+		//System.out.println(dic);
 		
 		
 	}
