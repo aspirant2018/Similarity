@@ -62,9 +62,8 @@ public class Similarity {
 		for (String namefile:NameContent.keySet()) {
 			
 			ArrayList<String> Tokens=new ArrayList<>();
-			for (String word:NameContent.get(namefile).split("[\\s,:.()-;\\[\\]]+")) {
-				word.toLowerCase();
-				Tokens.add(word);				
+			for (String word:NameContent.get(namefile).split("[\\s,\\'?\":.!()-;\\[\\]]+")) {
+				Tokens.add(word.toLowerCase());				
 			}
 			NameContentTokenized.put(namefile, Tokens);
 
@@ -158,20 +157,66 @@ public class Similarity {
 // 3)  Représentation tf.idf
 	
 	
-	public static HashMap<String,Integer> TermFrequency (ArrayList<String> MotsDeDoc ) {
-		HashMap<String, Integer> tf = new HashMap<>();
+	public static HashMap<String,Double> TermFrequency (ArrayList<String> MotsDeDoc ) {
+		HashMap<String, Double> tf = new HashMap<>();
 
 	    // calculer le nombre d'occurence de chaque mot dans un seul document
 	    for (String Mot : MotsDeDoc) {
 	        if (tf.containsKey(Mot)) {
 	            tf.put(Mot, tf.get(Mot) + 1);
 	        } else {
-	            tf.put(Mot, 1);
+	            tf.put(Mot, (double) 1);
 	        }
 	    }
+	    for (String Mot:tf.keySet()) {
+	    	tf.put(Mot,tf.get(Mot)/tf.size());
+	    }
+	    //System.out.println(tf.size());
+	    
 	    return tf;
 	}
 	
+	public static HashMap<String,Double> InverseDocumentFrequency (HashMap<String, ArrayList<String>>NameContentTokenized){
+		HashMap<String, Double> idf = new HashMap<>();
+		
+		for (String filename:NameContentTokenized.keySet()) {
+			HashSet<String> listMot = new HashSet<>(NameContentTokenized.get(filename));
+			for (String mot:listMot){
+				if (idf.containsKey(mot)){
+					idf.put(mot, idf.get(mot) + 1);
+				}
+				else {
+					idf.put(mot, (double) 1);
+				}
+			}
+		}
+		
+		for (String Mot: idf.keySet()) {
+			double ratio = Math.log10(58/idf.get(Mot))+1;
+			idf.put(Mot, ratio);
+		}		
+		
+		return idf;
+	}
+	
+	public static void itidf (HashMap<String, ArrayList<String>>NameContentTokenized, String mot) {
+		
+		HashMap<String, Double> tf = new HashMap<>();
+		HashMap<String,Double> idf = InverseDocumentFrequency(NameContentTokenized);
+		for (String filename:NameContentTokenized.keySet()) {
+			tf = TermFrequency(NameContentTokenized.get(filename));
+			if (tf.containsKey(mot)){
+				
+				double score = (tf.get(mot))*idf.get(mot);
+				System.out.println(filename+score);
+			}
+			
+		}
+		
+		
+	}
+	
+	// fonction principale
 	public static void main(String[] args) {
 		
 		
@@ -187,9 +232,11 @@ public class Similarity {
 		HashMap<String, HashMap<String, Integer>> dic = similarity(NameContentTokenized, 5);
 		
 		//MotsCommun(NameContentTokenized);
-		
-		
-		//System.out.println(TermFrequency(NameContentTokenized.get("31_taft_1909.txt")));
+		List<String> words = Arrays.asList("government", "borders", "people", "obama", "war", "honor", "foreign", "men", "women", "children");
+		for (String word:words) {
+			System.out.println("the word: "+word);
+			itidf(NameContentTokenized,word);
+		}
 		
 		
 		
