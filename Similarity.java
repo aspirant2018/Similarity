@@ -1,9 +1,4 @@
 import java.util.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.TreeMap;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,29 +41,21 @@ public class Similarity {
 			}
 			
 		}
-		//System.out.println(NameContent.keySet());
 		return NameContent;
 	}
 	
 	private static HashMap<String, ArrayList<String>>tokenization(HashMap<String, String> nameContent) {
-		
-		HashMap<String, String> NameContent = new HashMap<>();
-		NameContent=nameContent;
-		
-		// Initialisation
-		
+				
 		HashMap<String, ArrayList<String>> NameContentTokenized = new HashMap<>();
 		
-		for (String namefile:NameContent.keySet()) {
+		for (String namefile:nameContent.keySet()) {
 			
 			ArrayList<String> Tokens=new ArrayList<>();
-			for (String word:NameContent.get(namefile).split("[\\s,\\'?\":.!()-;\\[\\]]+")) {
+			for (String word:nameContent.get(namefile).split("[\\s,\\'?\":.!()-;\\[\\]]+")) {
 				Tokens.add(word.toLowerCase());				
 			}
 			NameContentTokenized.put(namefile, Tokens);
-
 		}
-		
 		return NameContentTokenized;
 		
 	}
@@ -76,18 +63,11 @@ public class Similarity {
 // 2) Réprésentation en « sac de mots » des documents
 	
 	private static HashMap<String,HashMap<String,Integer>> similarity(HashMap<String, ArrayList<String>> NameContentTokenized,int n) {
-		
 		HashMap <String,HashMap<String,Integer>> AllfilesSimilarity = new HashMap<>();
-		
-		
 		for (String namefile_first: NameContentTokenized.keySet()) {
-			
 			HashMap <String,Integer> NombreCommun = new HashMap<>();
-			
 			for (String namefile_second:NameContentTokenized.keySet()) {
-				
 				if (namefile_first != namefile_second) {
-				
 					HashSet<String> firstwords = new HashSet<String>(NameContentTokenized.get(namefile_first));
 					HashSet<String> secondwords = new HashSet<String>(NameContentTokenized.get(namefile_second));
 					int n1 = firstwords.size();
@@ -95,13 +75,11 @@ public class Similarity {
 					NombreCommun.putIfAbsent(namefile_second, n1-firstwords.size());
 				}
 			}
-			// sorting a HashMap
+			// trier la liste des mots en commun 
 			HashMap<String, Integer> SortedNombreCommun = Sorting(NombreCommun);
-			// les n documents les plus similaires
+			// les  documents les plus similaires
 			HashMap<String, Integer> LesPlusSimilaire = PlusSimilaire(SortedNombreCommun,n);
 			AllfilesSimilarity.put(namefile_first,Sorting(LesPlusSimilaire));
-			//System.out.println(AllfilesSimilarity);
-			
 		}
 		return AllfilesSimilarity;
 	}
@@ -119,7 +97,6 @@ public class Similarity {
 	    }
 		
 	}
-	// alot of function words 
 	
 	
 	private static HashMap<String,Integer> PlusSimilaire(HashMap<String, Integer> sortedNombreCommun, int n) {
@@ -135,7 +112,6 @@ public class Similarity {
 	    }
 	    return result;
 }
-
 
 	// sorting function HashMap
 	
@@ -157,69 +133,98 @@ public class Similarity {
 // 3)  Représentation tf.idf
 	
 	
-	public static HashMap<String,Double> TermFrequency (ArrayList<String> MotsDeDoc ) {
-		HashMap<String, Double> tf = new HashMap<>();
+	public static HashMap<String,Integer> TermFrequency (ArrayList<String> MotsDeDoc ) {
+		HashMap<String, Integer> tf = new HashMap<>();
 
 	    // calculer le nombre d'occurence de chaque mot dans un seul document
 	    for (String Mot : MotsDeDoc) {
 	        if (tf.containsKey(Mot)) {
 	            tf.put(Mot, tf.get(Mot) + 1);
 	        } else {
-	            tf.put(Mot, (double) 1);
+	            tf.put(Mot, 1);
 	        }
 	    }
-	    for (String Mot:tf.keySet()) {
-	    	tf.put(Mot,tf.get(Mot)/tf.size());
-	    }
-	    //System.out.println(tf.size());
-	    
 	    return tf;
 	}
 	
-	public static HashMap<String,Double> InverseDocumentFrequency (HashMap<String, ArrayList<String>>NameContentTokenized){
-		HashMap<String, Double> idf = new HashMap<>();
+	public static HashMap<String,Double> DocumentFrequency (HashMap<String, ArrayList<String>>NameContentTokenized){
+		HashMap<String, Double> df = new HashMap<>();
 		
 		for (String filename:NameContentTokenized.keySet()) {
 			HashSet<String> listMot = new HashSet<>(NameContentTokenized.get(filename));
 			for (String mot:listMot){
-				if (idf.containsKey(mot)){
-					idf.put(mot, idf.get(mot) + 1);
+				if (df.containsKey(mot)){
+					df.put(mot, df.get(mot) + 1);
 				}
 				else {
-					idf.put(mot, (double) 1);
+					df.put(mot, (double) 1);
 				}
 			}
 		}
-		
-		for (String Mot: idf.keySet()) {
-			double ratio = Math.log10(58/idf.get(Mot))+1;
-			idf.put(Mot, ratio);
+		for (String Mot: df.keySet()) {
+			double ratio = (double) 58 / df.getOrDefault(Mot, (double) 0);
+			df.put(Mot, ratio);
 		}		
-		
-		return idf;
+		return df;
 	}
 	
-	public static void itidf (HashMap<String, ArrayList<String>>NameContentTokenized, String mot) {
+	public static void tfidf (HashMap<String, ArrayList<String>>NameContentTokenized, List<String> mots) {
 		
-		HashMap<String, Double> tf = new HashMap<>();
-		HashMap<String,Double> idf = InverseDocumentFrequency(NameContentTokenized);
-		for (String filename:NameContentTokenized.keySet()) {
-			tf = TermFrequency(NameContentTokenized.get(filename));
-			if (tf.containsKey(mot)){
+		HashMap<String, Integer> tf = new HashMap<>();
+		
+		HashMap<String,Double> df = DocumentFrequency(NameContentTokenized);
+		
+		for (String mot: mots) {
+			for (String filename:NameContentTokenized.keySet()) {
+				tf = TermFrequency(NameContentTokenized.get(filename));
 				
-				double score = (tf.get(mot))*idf.get(mot);
-				System.out.println(filename+score);
-			}
+					if (tf.containsKey(mot)){
+						
+						double tfscore=tf.get(mot)/ (double) tf.size();
+						double idfscore=Math.log10(df.get(mot));
+						double score = (tfscore * idfscore) ;
+						System.out.println(filename+" : "+score+"  ===>"+ tfscore +"*"+idfscore);
+					}
+				}
+			}		
+	}
+	
+	public static void MotsImportant(HashMap<String, ArrayList<String>>docs) {
+		
+		TreeMap <String,ArrayList<String>> TousMotsImportant = new TreeMap<>();
+		HashMap<String, Integer> tf = new HashMap<>();
+		HashMap<String,Double> df = DocumentFrequency(docs);
+
+		// 3 instructions pour enlever les mots repetée 
+		ArrayList<String> touslesmots = docs.get("58_trump_2017.txt");	
+		HashSet<String> touslesmotsSet= new HashSet<String>(touslesmots);
+		ArrayList<String> AllWords = new ArrayList<String>(touslesmotsSet);
+		
+		
+		for (String mot: AllWords) {
 			
+			tf = TermFrequency(docs.get("58_trump_2017.txt"));
+				
+				if (tf.containsKey(mot)){
+						
+					double tfscore=tf.get(mot)/ (double) tf.size();
+					double idfscore=Math.log10(df.get(mot));
+					double score = (tfscore * idfscore)*100 ;
+					System.out.println(mot+" "+score);
+					
+
+				}
+				
+			}
+		
 		}
 		
 		
-	}
+		
 	
+
 	// fonction principale
 	public static void main(String[] args) {
-		
-		
 		ArrayList<String> listfile = new ArrayList<>();
 		HashMap <String,String> NameContent = new HashMap <>();
 		
@@ -231,15 +236,13 @@ public class Similarity {
 		
 		HashMap<String, HashMap<String, Integer>> dic = similarity(NameContentTokenized, 5);
 		
-		//MotsCommun(NameContentTokenized);
-		List<String> words = Arrays.asList("government", "borders", "people", "obama", "war", "honor", "foreign", "men", "women", "children");
-		for (String word:words) {
-			System.out.println("the word: "+word);
-			itidf(NameContentTokenized,word);
-		}
+		List<String> mots = Arrays.asList("and", "government", "people", "obama", "war", "honor", "foreign", "men", "women", "children");
 		
+		//tfidf(NameContentTokenized,mots);
 		
-		
+		//System.out.println(DocumentFrequency(NameContentTokenized));
+		//MotsImportant(NameContentTokenized);
+		MotsCommun(NameContentTokenized);
 	}
 
 
